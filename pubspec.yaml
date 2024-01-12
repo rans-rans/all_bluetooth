@@ -1,0 +1,28 @@
+name: all_bluetooth
+description: "This is a flutter plugin that allows you to implement bluetooth features. Listing bonded devices, scan for new devices, listening to bluetooth state(on/off), connecting to devices, sending data across devices etc."
+version: 0.0.1
+homepage: https://github.com/rans-rans/all_bluetooth
+
+environment:
+  sdk: '>=3.2.3 <4.0.0'
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  plugin:
+    platforms:
+      android:
+        package: com.rans_innovations.all_bluetooth
+        pluginClass: AllBluetoothPlugin
