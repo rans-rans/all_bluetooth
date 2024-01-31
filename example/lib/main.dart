@@ -39,7 +39,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool listeningForClient = false;
 
-  final devices = ValueNotifier<List<BluetoothDevice>>([]);
+  final bondedDevices = ValueNotifier<List<BluetoothDevice>>([]);
+  final scannedDevices = ValueNotifier<List<BluetoothDevice>>([]);
 
   @override
   void initState() {
@@ -98,39 +99,76 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             false => Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        switch (bluetoothOn) {
-                          true => "ON",
-                          false => "off",
-                        },
-                        style: TextStyle(
-                          color: bluetoothOn ? Colors.green : Colors.red,
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          switch (bluetoothOn) {
+                            true => "ON",
+                            false => "off",
+                          },
+                          style: TextStyle(
+                            color: bluetoothOn ? Colors.green : Colors.red,
+                          ),
                         ),
-                      ),
-                      ElevatedButton(
-                        onPressed: switch (bluetoothOn) {
-                          false => null,
-                          true => () {
-                              allBluetooth
-                                  .getBondedDevices()
-                                  .then((newDevices) {
-                                devices.value = newDevices;
-                              });
-                            },
-                        },
-                        child: const Text("Bonded Devices"),
-                      ),
-                    ],
+                        ElevatedButton(
+                          onPressed: switch (bluetoothOn) {
+                            false => null,
+                            true => () {
+                                allBluetooth
+                                    .getBondedDevices()
+                                    .then((newDevices) {
+                                  bondedDevices.value = newDevices;
+                                });
+                              },
+                          },
+                          child: const Text("Bonded Devices"),
+                        ),
+                        ElevatedButton(
+                          onPressed: switch (bluetoothOn) {
+                            false => null,
+                            true => () {
+                                allBluetooth.startDiscovery();
+                              },
+                          },
+                          child: const Text("Discover"),
+                        ),
+                        ElevatedButton(
+                          onPressed: switch (bluetoothOn) {
+                            false => null,
+                            true => () {
+                                allBluetooth.stopDiscovery();
+                                allBluetooth.discoverDevices.listen((event) {
+                                  scannedDevices.value = [
+                                    ...scannedDevices.value,
+                                    event
+                                  ];
+                                });
+                              },
+                          },
+                          child: const Text("Stop discover"),
+                        ),
+                      ],
+                    ),
                   ),
                   if (!bluetoothOn)
                     const Center(child: Text("Turn bluetooth on"))
                   else
-                    DeviceListWidget(
-                      notifier: devices,
-                      title: "Paired Devices",
+                    Expanded(
+                      child: Column(
+                        children: [
+                          DeviceListWidget(
+                            notifier: bondedDevices,
+                            title: "Paired Devices",
+                          ),
+                          DeviceListWidget(
+                            notifier: scannedDevices,
+                            title: "Scanned Devices",
+                          ),
+                        ],
+                      ),
                     ),
                 ],
               ),
@@ -270,7 +308,14 @@ class DeviceListWidget extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(title),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        decoration: TextDecoration.underline,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     Text(value.length.toString()),
                   ],
                 ),

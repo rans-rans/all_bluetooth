@@ -53,6 +53,19 @@ class MockAllBluetoothPlatform
   Stream<String> get listenForData {
     throw UnimplementedError();
   }
+
+  @override
+  Stream<BluetoothDevice> get discoverDevices => throw UnimplementedError();
+
+  @override
+  Future<void> startDiscovery() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> stopDiscovery() {
+    throw UnimplementedError();
+  }
 }
 
 void main() {

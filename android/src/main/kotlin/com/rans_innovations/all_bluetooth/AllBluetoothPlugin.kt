@@ -31,12 +31,14 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
 
     private lateinit var bluetoothChangeEvent: EventChannel
     private lateinit var connectionChangeEvent: EventChannel
+    private lateinit var foundDeviceEvent: EventChannel
     private lateinit var sendReceiveEvent: EventChannel
 
 
     private var bluetoothStateSink: EventChannel.EventSink? = null
     private var connectionStateSink: EventChannel.EventSink? = null
     private var sendReceiveSink: EventChannel.EventSink? = null
+    private var foundDeviceEventSink: EventChannel.EventSink? = null
 
     private lateinit var broadcastReceiver: BroadcastReceiver
 
@@ -60,13 +62,16 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
         methodChannel.setMethodCallHandler(this)
 
 
-        bluetoothChangeEvent =
-            EventChannel(flutterPluginBinding.binaryMessenger, "bluetooth_change_event")
-        connectionChangeEvent =
-            EventChannel(flutterPluginBinding.binaryMessenger, "connection_change_event")
-        sendReceiveEvent =
-            EventChannel(flutterPluginBinding.binaryMessenger, ("send_receive_event"))
-
+        flutterPluginBinding.binaryMessenger.also {
+            bluetoothChangeEvent =
+                EventChannel(it, "bluetooth_change_event")
+            connectionChangeEvent =
+                EventChannel(it, "connection_change_event")
+            foundDeviceEvent =
+                EventChannel(it, "found_device_event")
+            sendReceiveEvent =
+                EventChannel(it, "send_receive_event")
+        }
 
 
         bluetoothManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -83,30 +88,34 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
                     bluetoothStateSink = events
                 }
 
-                override fun onCancel(arguments: Any?) {
-                }
+                override fun onCancel(arguments: Any?) {}
             }
         )
-
         connectionChangeEvent.setStreamHandler(
             object : EventChannel.StreamHandler {
                 override fun onListen(args: Any?, events: EventChannel.EventSink?) {
                     connectionStateSink = events
                 }
 
-                override fun onCancel(arguments: Any?) {
-                }
+                override fun onCancel(arguments: Any?) {}
             }
         )
+        foundDeviceEvent.setStreamHandler(
+            object : EventChannel.StreamHandler {
+                override fun onListen(args: Any?, events: EventChannel.EventSink?) {
+                    foundDeviceEventSink = events
+                }
 
+                override fun onCancel(arguments: Any?) {}
+            }
+        )
         sendReceiveEvent.setStreamHandler(
             object : EventChannel.StreamHandler {
                 override fun onListen(args: Any?, events: EventChannel.EventSink?) {
                     sendReceiveSink = events
                 }
 
-                override fun onCancel(arguments: Any?) {
-                }
+                override fun onCancel(arguments: Any?) {}
             }
         )
 
@@ -123,6 +132,17 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
             },
             listenToState = {
                 bluetoothStateSink?.success(bluetoothAdapter.isEnabled)
+            },
+            foundDeviceCallback = {
+                val name = it?.name ?: "Unknown name"
+                val address = it?.address ?: "Unknown address"
+                foundDeviceEventSink?.success(
+                    mapOf(
+                        "name" to name,
+                        "address" to address,
+                        "bonded_state" to false
+                    )
+                )
             }
         )
 
@@ -130,9 +150,15 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
             addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
             addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
             addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
+            addAction(BluetoothDevice.ACTION_FOUND)
         }
 
         context.registerReceiver(broadcastReceiver, filter)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(broadcastReceiver)
     }
 
 
@@ -145,7 +171,11 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
                 val response = mutableListOf<Map<*, *>>()
                 bondedDevices.forEach {
                     response.add(
-                        mapOf("name" to it.name, "address" to it.address)
+                        mapOf(
+                            "name" to it.name,
+                            "address" to it.address,
+                            "bonded_state" to true
+                        )
                     )
                 }
                 if (!bluetoothAdapter.isEnabled) {
@@ -209,6 +239,14 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
             "close_connection" -> {
                 closeConnection()
             }
+
+            "start_discovery" -> {
+                bluetoothAdapter.startDiscovery()
+            }
+
+            "stop_discovery" -> {
+                closeDiscovery()
+            }
         }
     }
 
@@ -217,6 +255,7 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
 
         bluetoothChangeEvent.setStreamHandler(null)
         connectionChangeEvent.setStreamHandler(null)
+        foundDeviceEvent.setStreamHandler(null)
         sendReceiveEvent.setStreamHandler(null)
     }
 
@@ -236,6 +275,12 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
         }
     }
 
+    private fun closeDiscovery() {
+        if (bluetoothAdapter.isDiscovering) {
+            bluetoothAdapter.cancelDiscovery()
+        }
+    }
+
 
     inner class ServerClass : Thread() {
         override fun run() {
@@ -249,6 +294,8 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
                     serverSocket = newServerSocket
                     while (shouldLoop) {
 
+                        closeDiscovery()
+
                         clientSocket =
                             try {
                                 serverSocket?.accept()
@@ -256,6 +303,7 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
                                 shouldLoop = false
                                 null
                             }
+
 
                         clientSocket?.let { socket ->
                             try {
@@ -283,6 +331,9 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
 
             clientSocket?.let { socket ->
                 try {
+
+                    closeDiscovery()
+
                     socket.connect()
 
                     sendReceive = SendReceive(socket)
@@ -366,7 +417,8 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
             "response" to message,
             "status" to status,
             "name" to device?.name,
-            "address" to device?.address
+            "address" to device?.address,
+            "bonded_state" to true
         )
     }
 

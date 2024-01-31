@@ -42,6 +42,7 @@ final allBluetooth = AllBluetooth
 - Bluetooth device: The package provides you with the object to easily manage bluetooth devices. It has the following fields
   - device name: `String`
   - device address: `String`
+  - bonded state `bool`
 
 <br/>
 
@@ -77,7 +78,7 @@ Methods like `listenToData` and `sendMessage` can only work properly if there is
 ```
 example
 
-final devices = await allBluetooth.getBondedDevice();
+final devices = await allBluetooth.getBondedDevices();
 print(devices)
 
 output
@@ -96,6 +97,16 @@ output
 <br/>
 
 - `startBluetoothServer`: This function is used to open a server socket if you want to connect as a server. The opened socket will keep listening for clients unless you explictly close the bluetooth server with `closeConnection` function. Use the `listenForConnection` to listen for clients.
+
+<br/>
+
+- `startDiscovery`: This function is used to start bluetooth discovery of unpaired or new devices. This function should be used together with [discoverNewDevices] stream in order in get discovered devices. If you are not getting the devices as expected, just call [stopDiscovery], and [startDiscovery] again.
+
+<br/>
+
+- `stopDiscovery`: Use this function to stop discovering.
+
+
 
 ---
 
@@ -118,6 +129,18 @@ You can refer to main.dart in the example tab for reference
 
 <br/>
 
+- `discoverDevices`: This stream is used to listen for new bluetooth devices. In other words, this stream emits new bluetooth devices. Unlike the [getBondedDevices] function which returns a list of bluetooth devices, this stream emits one device at a time so you would want to store the device in a list when it is emitted. For instance
+  
+   ```
+    allBluetooth.discoverNewDevices.listen((device) {
+         scannedDevices.add(device);
+       });
+   ```
+
+
+<br/>
+
+
 - `listenForConnection`: This stream is used to listen for bluetooth connections. This connection contains the `ConnectionResult`, that is, the status, the response message of that connection, and if the connection was successful, there will also be a `BluetoothDevice` object also. It is best prefered if you wrapped your entire app with this stream in a stream builder
 
 <br/>
@@ -131,14 +154,9 @@ You can refer to main.dart in the example tab for reference
 
 <br/>
 
-### TODO
-
-- Discovery and bonding to new devices.
-- Setting a timeout for a Bluetooth server.
-- Connection to multiple devices.
-
 ### Contributions and support
 
 - All contributions and issues are welcome.
+- Contact me at ransfordowusuansah9@gmail.com.
 - If you want to contribute code, please create a pull request
 - If you find a bug or want a feature, please fill an issue

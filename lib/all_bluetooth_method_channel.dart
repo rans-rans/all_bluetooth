@@ -16,6 +16,7 @@ final class MethodChannelAllBluetooth extends AllBluetoothPlatform {
   final bluetoothChangeEvent = const EventChannel("bluetooth_change_event");
   final connectionChange = const EventChannel("connection_change_event");
   final sendReceiveEvent = const EventChannel("send_receive_event");
+  final foundDeviceEvent = const EventChannel("found_device_event");
 
   @override
   Future<void> closeConnection() async {
@@ -55,6 +56,29 @@ final class MethodChannelAllBluetooth extends AllBluetoothPlatform {
     final response =
         await methodChannel.invokeMethod("send_message", message) as bool;
     return response;
+  }
+
+  @override
+  Future<void> startDiscovery() async {
+    methodChannel.invokeMethod("start_discovery");
+  }
+
+  @override
+  Future<void> stopDiscovery() async {
+    methodChannel.invokeMethod("stop_discovery");
+  }
+
+  @override
+  Stream<BluetoothDevice> get discoverDevices {
+    final stream = foundDeviceEvent.receiveBroadcastStream().map(
+      (event) {
+        final data =
+            HelperFunctions.convertToMap(event as Map<Object?, Object?>);
+        final device = BluetoothDevice.fromMap(data);
+        return device;
+      },
+    );
+    return stream;
   }
 
   @override

@@ -76,6 +76,33 @@ class AllBluetooth {
     return response;
   }
 
+  /// This function is used to start bluetooth discovery of unpaired or new devices. This function should be used
+  /// together with [discoverDevices] stream in order in get discovered devices. If you are not getting
+  /// the devices as expected, just call [stopDiscovery], and [startDiscovery] again.
+  Future<void> startDiscovery() {
+    return instance.startDiscovery();
+  }
+
+  /// This function is used to stop bluetooth discovery.
+  Future<void> stopDiscovery() {
+    return instance.stopDiscovery();
+  }
+
+  /// This stream is used to listen for new bluetooth devices. In other words, this stream
+  /// emits new bluetooth devices. Unlike the [getBondedDevices] function which returns a list
+  /// of  bluetooth devices, this stream emits one device at a time so you would want to store the device
+  /// in a list when it is emitted. For instance
+  ///
+  ///
+  /// ```
+  ///  allBluetooth.discoverNewDevices.listen((device) {
+  ///       scannedDevices.add(device);
+  ///     });
+  /// ```
+  Stream<BluetoothDevice> get discoverDevices {
+    return instance.discoverDevices;
+  }
+
   /// This stream is used to listen for bluetooth connections.
   /// This connection contains the [ConnectionResult], that is, the status, the response message of
   /// that connection, and if the connection was successful, there will also be a [BluetoothDevice]
