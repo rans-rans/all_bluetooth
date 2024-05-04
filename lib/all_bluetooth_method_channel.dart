@@ -53,10 +53,7 @@ final class MethodChannelAllBluetooth extends AllBluetoothPlatform {
 
   @override
   Future<void> startAdvertising({int? secondDuration}) async {
-    methodChannel.invokeMethod(
-      "start_advertising",
-      {'secondDuration': secondDuration},
-    );
+    methodChannel.invokeMethod("start_advertising", secondDuration);
   }
 
   @override

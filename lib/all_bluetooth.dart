@@ -90,7 +90,9 @@ class AllBluetooth {
     return instance.stopDiscovery();
   }
 
-  /// This function is used to stop bluetooth discovery.
+  /// This function is used to advertise a device for discovery
+  ///
+  /// This method should be used with [startBluetoothServer]
   Future<void> startAdvertising({int? secondDuration}) {
     return instance.startAdvertising(secondDuration: secondDuration);
   }

@@ -248,7 +248,7 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
             }
             "start_advertising" -> {
 
-                val secondDuration = call.argument<Int?>("secondDuration")
+                val secondDuration = call.arguments as Int?
                 val requestCode = 1
                 // Enable discoverability
                 val discoverableIntent: Intent = Intent(
