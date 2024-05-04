@@ -1,26 +1,23 @@
 package com.rans_innovations.all_bluetooth
 
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothManager
-import android.bluetooth.BluetoothServerSocket
-import android.bluetooth.BluetoothSocket
+import android.annotation.SuppressLint
+import android.bluetooth.*
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.IntentFilter
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import androidx.core.content.ContextCompat
+import com.google.android.material.internal.ContextUtils
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
 import java.io.IOException
-import java.util.UUID
+import java.util.*
 
 /** AllBluetoothPlugin */
 class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
@@ -163,7 +160,8 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
     }
 
 
-    override fun onMethodCall(call: MethodCall, result: Result) {
+    @SuppressLint("RestrictedApi")
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
 
 
         when (call.method) {
@@ -249,15 +247,21 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
                 closeDiscovery()
             }
             "start_advertising" -> {
+
                 val secondDuration = call.argument<Int?>("secondDuration")
                 val requestCode = 1
-                val discoverableIntent: Intent =
-                    Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
-                        putExtra(
-                            BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
-                            (secondDuration ?: 300)
-                        )
-                    }
+                // Enable discoverability
+                val discoverableIntent: Intent = Intent(
+                    BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE
+                ).apply {
+                    putExtra(
+                        BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
+                        secondDuration ?: 300
+                    )
+                }
+
+                ContextUtils.getActivity(this)
+                    ?.startActivityForResult(discoverableIntent, requestCode)
             }
         }
     }

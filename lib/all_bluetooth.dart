@@ -2,9 +2,11 @@ library all_bluetooth;
 
 import 'all_bluetooth_platform_interface.dart';
 
-part "package:all_bluetooth/entities/bluetooth_device.dart";
-part "package:all_bluetooth/entities/connection_result.dart";
 part 'helper_functions.dart';
+
+part "package:all_bluetooth/entities/bluetooth_device.dart";
+
+part "package:all_bluetooth/entities/connection_result.dart";
 
 class AllBluetooth {
   final instance = AllBluetoothPlatform.instance;
@@ -86,6 +88,11 @@ class AllBluetooth {
   /// This function is used to stop bluetooth discovery.
   Future<void> stopDiscovery() {
     return instance.stopDiscovery();
+  }
+
+  /// This function is used to stop bluetooth discovery.
+  Future<void> startAdvertising({int? secondDuration}) {
+    return instance.startAdvertising(secondDuration: secondDuration);
   }
 
   /// This stream is used to listen for new bluetooth devices. In other words, this stream
