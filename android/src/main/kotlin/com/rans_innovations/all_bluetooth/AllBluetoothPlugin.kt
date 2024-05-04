@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.IntentFilter
+import android.content.Intent
 import android.os.Build
 import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
@@ -246,6 +247,17 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
 
             "stop_discovery" -> {
                 closeDiscovery()
+            }
+            "start_advertising" -> {
+                val secondDuration = call.argument<Int?>("secondDuration")
+                val requestCode = 1
+                val discoverableIntent: Intent =
+                    Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+                        putExtra(
+                            BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
+                            (secondDuration ?: 300)
+                        )
+                    }
             }
         }
     }

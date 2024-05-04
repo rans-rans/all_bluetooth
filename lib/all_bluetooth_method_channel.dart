@@ -52,6 +52,14 @@ final class MethodChannelAllBluetooth extends AllBluetoothPlatform {
   }
 
   @override
+  Future<void> startAdvertising({int? secondDuration}) async {
+    methodChannel.invokeMethod(
+      "start_advertising",
+      {'secondDuration': secondDuration},
+    );
+  }
+
+  @override
   Future<bool> sendMessage(String message) async {
     final response =
         await methodChannel.invokeMethod("send_message", message) as bool;

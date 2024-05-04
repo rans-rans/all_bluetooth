@@ -36,6 +36,8 @@ abstract class AllBluetoothPlatform extends PlatformInterface {
 
   Future<void> startBluetoothServer();
 
+  Future<void> startAdvertising({int? secondDuration});
+
   Future<bool> sendMessage(String message);
 
   Future<void> startDiscovery();

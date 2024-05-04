@@ -66,6 +66,11 @@ class MockAllBluetoothPlatform
   Future<void> stopDiscovery() {
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> startAdvertising({int? secondDuration}) {
+    throw UnimplementedError();
+  }
 }
 
 void main() {
