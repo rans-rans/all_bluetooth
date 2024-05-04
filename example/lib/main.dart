@@ -66,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   false => null,
                   true => () {
                       allBluetooth.startBluetoothServer();
+                      allBluetooth.startAdvertising();
                       setState(() {
                         listeningForClient = true;
                       });
