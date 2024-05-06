@@ -38,7 +38,7 @@ abstract class AllBluetoothPlatform extends PlatformInterface {
 
   Future<void> startAdvertising({int? secondDuration});
 
-  Future<bool> sendMessage(String message);
+  Future<bool> sendMessage(List<int> message);
 
   Future<void> startDiscovery();
 
@@ -48,7 +48,7 @@ abstract class AllBluetoothPlatform extends PlatformInterface {
 
   Stream<bool> get listenToBluetoothState;
 
-  Stream<String?> get listenForData;
+  Stream<List<int>> get listenForData;
 
   Stream<ConnectionResult> get listenForConnection;
 }

@@ -57,7 +57,7 @@ final class MethodChannelAllBluetooth extends AllBluetoothPlatform {
   }
 
   @override
-  Future<bool> sendMessage(String message) async {
+  Future<bool> sendMessage(List<int> message) async {
     final response =
         await methodChannel.invokeMethod("send_message", message) as bool;
     return response;
@@ -106,11 +106,12 @@ final class MethodChannelAllBluetooth extends AllBluetoothPlatform {
   }
 
   @override
-  Stream<String?> get listenForData {
+  Stream<List<int>> get listenForData {
     final stream = sendReceiveEvent.receiveBroadcastStream().map((event) {
       if (event["status"] == false) return null;
-      return event["response"].toString();
-    });
-    return stream;
+      return event["response"] as List<int>?;
+    }).where((event) => event != null);
+
+    return stream.cast();
   }
 }

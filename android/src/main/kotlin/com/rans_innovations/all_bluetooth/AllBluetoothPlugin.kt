@@ -230,7 +230,7 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
                     )
                     return
                 }
-                val message = call.arguments as String
+                val message = call.arguments as ByteArray
                 val messageSent = sendReceive.sendMessage(message)
                 result.success(messageSent)
             }
@@ -260,8 +260,7 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
                     )
                 }
 
-                ContextUtils.getActivity(this)
-                    ?.startActivityForResult(discoverableIntent, requestCode)
+                ContextUtils.getActivity(this)?.startActivityForResult(discoverableIntent, requestCode)
             }
         }
     }
@@ -392,7 +391,7 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
                     val message = buffer.decodeToString(endIndex = bytes)
                     val response =
                         mapOf(
-                            "response" to message,
+                            "response" to buffer,
                             "status" to true
                         )
 
@@ -410,10 +409,9 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
         }
 
 
-        fun sendMessage(message: String): Boolean {
+        fun sendMessage(message: ByteArray): Boolean {
             return try {
-                socket.outputStream
-                    .write(message.toByteArray())
+                socket.outputStream.write(message)
                 true
             } catch (e: Exception) {
                 e.printStackTrace()

@@ -73,7 +73,7 @@ class AllBluetooth {
   /// <br/>
   ///
   /// This function returns true if successful and false if unsuccessful
-  Future<bool> sendMessage(String message) async {
+  Future<bool> sendMessage(List<int> message) async {
     final response = await instance.sendMessage(message);
     return response;
   }
@@ -122,7 +122,7 @@ class AllBluetooth {
 
   /// The stream for listening for data/messages across a bluetooth connection. Make sure you use it with the
   /// [listenForConnection] stream so that you will be sure you are send across a proper connection
-  Stream<String?> get listenForData {
+  Stream<List<int>> get listenForData {
     return instance.listenForData;
   }
 

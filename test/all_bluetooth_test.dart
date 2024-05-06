@@ -30,7 +30,7 @@ class MockAllBluetoothPlatform
   }
 
   @override
-  Future<bool> sendMessage(String message) {
+  Future<bool> sendMessage(List<int> message) {
     throw UnimplementedError();
   }
 
@@ -50,7 +50,7 @@ class MockAllBluetoothPlatform
   }
 
   @override
-  Stream<String> get listenForData {
+  Stream<List<int>> get listenForData {
     throw UnimplementedError();
   }
 
