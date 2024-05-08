@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -11,7 +12,7 @@ final class MethodChannelAllBluetooth extends AllBluetoothPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel =
-      const MethodChannel('com.rans_innovations/all_bluetooth');
+  const MethodChannel('com.rans_innovations/all_bluetooth');
 
   final bluetoothChangeEvent = const EventChannel("bluetooth_change_event");
   final connectionChange = const EventChannel("connection_change_event");
@@ -31,7 +32,7 @@ final class MethodChannelAllBluetooth extends AllBluetoothPlatform {
   @override
   Future<List<BluetoothDevice>> getBondedDevices() async {
     final response =
-        await methodChannel.invokeMethod("get_bonded_devices") as List<Object?>;
+    await methodChannel.invokeMethod("get_bonded_devices") as List<Object?>;
     final devices = response.map(BluetoothDevice.fromMap);
     return devices.toList();
   }
@@ -58,8 +59,8 @@ final class MethodChannelAllBluetooth extends AllBluetoothPlatform {
 
   @override
   Future<bool> sendMessage(List<int> message) async {
-    final response =
-        await methodChannel.invokeMethod("send_message", message) as bool;
+    final response = await methodChannel
+        .invokeMethod("send_message", Uint8List.fromList(message)) as bool;
     return response;
   }
 
@@ -76,9 +77,9 @@ final class MethodChannelAllBluetooth extends AllBluetoothPlatform {
   @override
   Stream<BluetoothDevice> get discoverDevices {
     final stream = foundDeviceEvent.receiveBroadcastStream().map(
-      (event) {
+          (event) {
         final data =
-            HelperFunctions.convertToMap(event as Map<Object?, Object?>);
+        HelperFunctions.convertToMap(event as Map<Object?, Object?>);
         final device = BluetoothDevice.fromMap(data);
         return device;
       },
@@ -98,7 +99,7 @@ final class MethodChannelAllBluetooth extends AllBluetoothPlatform {
   Stream<ConnectionResult> get listenForConnection {
     final stream = connectionChange.receiveBroadcastStream().map((event) {
       final data =
-          HelperFunctions.convertToMap((event as Map<Object?, Object?>));
+      HelperFunctions.convertToMap((event as Map<Object?, Object?>));
       final connectionResult = ConnectionResult.fromMap(data);
       return connectionResult;
     });

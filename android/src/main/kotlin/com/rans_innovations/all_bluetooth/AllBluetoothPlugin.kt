@@ -260,7 +260,8 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
                     )
                 }
 
-                ContextUtils.getActivity(this)?.startActivityForResult(discoverableIntent, requestCode)
+                ContextUtils.getActivity(this)
+                    ?.startActivityForResult(discoverableIntent, requestCode)
             }
         }
     }
@@ -281,9 +282,13 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
 
 
     private fun closeConnection() {
+        serverSocket?.close()
         serverSocket = null
+
         clientSocket?.also {
             if (it.isConnected) {
+                it.inputStream.close()
+                it.outputStream.close()
                 it.close()
                 clientSocket = null
             }

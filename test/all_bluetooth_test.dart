@@ -2,7 +2,6 @@ import 'package:all_bluetooth/all_bluetooth.dart';
 import 'package:all_bluetooth/all_bluetooth_method_channel.dart';
 import 'package:all_bluetooth/all_bluetooth_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class MockAllBluetoothPlatform
