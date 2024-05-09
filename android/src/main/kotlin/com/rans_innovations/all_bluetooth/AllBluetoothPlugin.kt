@@ -1,25 +1,23 @@
 package com.rans_innovations.all_bluetooth
 
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothManager
-import android.bluetooth.BluetoothServerSocket
-import android.bluetooth.BluetoothSocket
+import android.annotation.SuppressLint
+import android.bluetooth.*
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import androidx.core.content.ContextCompat
+import com.google.android.material.internal.ContextUtils
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
 import java.io.IOException
-import java.util.UUID
+import java.util.*
 
 /** AllBluetoothPlugin */
 class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
@@ -162,7 +160,8 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
     }
 
 
-    override fun onMethodCall(call: MethodCall, result: Result) {
+    @SuppressLint("RestrictedApi")
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
 
 
         when (call.method) {
@@ -231,7 +230,7 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
                     )
                     return
                 }
-                val message = call.arguments as String
+                val message = call.arguments as ByteArray
                 val messageSent = sendReceive.sendMessage(message)
                 result.success(messageSent)
             }
@@ -246,6 +245,23 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
 
             "stop_discovery" -> {
                 closeDiscovery()
+            }
+            "start_advertising" -> {
+
+                val secondDuration = call.arguments as Int?
+                val requestCode = 1
+                // Enable discoverability
+                val discoverableIntent: Intent = Intent(
+                    BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE
+                ).apply {
+                    putExtra(
+                        BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
+                        secondDuration ?: 300
+                    )
+                }
+
+                ContextUtils.getActivity(this)
+                    ?.startActivityForResult(discoverableIntent, requestCode)
             }
         }
     }
@@ -266,9 +282,13 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
 
 
     private fun closeConnection() {
+        serverSocket?.close()
         serverSocket = null
+
         clientSocket?.also {
             if (it.isConnected) {
+                it.inputStream.close()
+                it.outputStream.close()
                 it.close()
                 clientSocket = null
             }
@@ -376,7 +396,7 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
                     val message = buffer.decodeToString(endIndex = bytes)
                     val response =
                         mapOf(
-                            "response" to message,
+                            "response" to buffer,
                             "status" to true
                         )
 
@@ -394,10 +414,9 @@ class AllBluetoothPlugin : FlutterPlugin, MethodCallHandler, FlutterActivity() {
         }
 
 
-        fun sendMessage(message: String): Boolean {
+        fun sendMessage(message: ByteArray): Boolean {
             return try {
-                socket.outputStream
-                    .write(message.toByteArray())
+                socket.outputStream.write(message)
                 true
             } catch (e: Exception) {
                 e.printStackTrace()

@@ -2,7 +2,6 @@ import 'package:all_bluetooth/all_bluetooth.dart';
 import 'package:all_bluetooth/all_bluetooth_method_channel.dart';
 import 'package:all_bluetooth/all_bluetooth_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class MockAllBluetoothPlatform
@@ -30,7 +29,7 @@ class MockAllBluetoothPlatform
   }
 
   @override
-  Future<bool> sendMessage(String message) {
+  Future<bool> sendMessage(List<int> message) {
     throw UnimplementedError();
   }
 
@@ -50,7 +49,7 @@ class MockAllBluetoothPlatform
   }
 
   @override
-  Stream<String> get listenForData {
+  Stream<List<int>> get listenForData {
     throw UnimplementedError();
   }
 
@@ -64,6 +63,11 @@ class MockAllBluetoothPlatform
 
   @override
   Future<void> stopDiscovery() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> startAdvertising({int? secondDuration}) {
     throw UnimplementedError();
   }
 }

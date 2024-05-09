@@ -2,9 +2,11 @@ library all_bluetooth;
 
 import 'all_bluetooth_platform_interface.dart';
 
-part "package:all_bluetooth/entities/bluetooth_device.dart";
-part "package:all_bluetooth/entities/connection_result.dart";
 part 'helper_functions.dart';
+
+part "package:all_bluetooth/entities/bluetooth_device.dart";
+
+part "package:all_bluetooth/entities/connection_result.dart";
 
 class AllBluetooth {
   final instance = AllBluetoothPlatform.instance;
@@ -71,7 +73,7 @@ class AllBluetooth {
   /// <br/>
   ///
   /// This function returns true if successful and false if unsuccessful
-  Future<bool> sendMessage(String message) async {
+  Future<bool> sendMessage(List<int> message) async {
     final response = await instance.sendMessage(message);
     return response;
   }
@@ -86,6 +88,13 @@ class AllBluetooth {
   /// This function is used to stop bluetooth discovery.
   Future<void> stopDiscovery() {
     return instance.stopDiscovery();
+  }
+
+  /// This function is used to advertise a device for discovery
+  ///
+  /// This method should be used with [startBluetoothServer]
+  Future<void> startAdvertising({int? secondDuration}) {
+    return instance.startAdvertising(secondDuration: secondDuration);
   }
 
   /// This stream is used to listen for new bluetooth devices. In other words, this stream
@@ -113,7 +122,7 @@ class AllBluetooth {
 
   /// The stream for listening for data/messages across a bluetooth connection. Make sure you use it with the
   /// [listenForConnection] stream so that you will be sure you are send across a proper connection
-  Stream<String?> get listenForData {
+  Stream<List<int>> get listenForData {
     return instance.listenForData;
   }
 

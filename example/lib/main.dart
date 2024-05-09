@@ -1,5 +1,4 @@
 import 'package:all_bluetooth/all_bluetooth.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -66,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   false => null,
                   true => () {
                       allBluetooth.startBluetoothServer();
+                      allBluetooth.startAdvertising();
                       setState(() {
                         listeningForClient = true;
                       });
@@ -196,10 +196,10 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     allBluetooth.listenForData.listen((event) {
-      if (event != null) {
+      if (event.isNotEmpty) {
         messageListener.value = [
           ...messageListener.value,
-          event,
+          String.fromCharCodes(event),
         ];
       }
     });
@@ -270,7 +270,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: FloatingActionButton(
                     onPressed: () {
                       final message = messageController.text;
-                      allBluetooth.sendMessage(message);
+                      allBluetooth.sendMessage(message.codeUnits);
                       messageController.clear();
                       FocusScope.of(context).unfocus();
                     },
